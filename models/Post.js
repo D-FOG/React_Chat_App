@@ -11,12 +11,21 @@ const PostSchema = new mongoose.Schema(
       max: 500,
     },
     img: {
-      type: String,
+      url: {
+        type: String,
+      },
+      filename : {
+        type: String,
+      }
     },
     likes: {
       type: Array,
       default: [],
     },
+    comments: {
+      type: Array,
+      default: []
+    }
   },
   { timestamps: true }
 );
