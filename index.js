@@ -34,10 +34,8 @@ mongoose.connect(process.env.MONGO_URL, {
   });
 
 //middleware
-const corsOption = {
-  origin: [process.env.ALLOWED_HOST],
-};
-app.use(cors(corsOption));
+
+app.use(cors());
 app.use(express.json());
 app.use(helmet());
 app.use(morgan("common"));
