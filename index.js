@@ -11,23 +11,27 @@ const conversationRoute = require("./routes/conversations");
 const messageRoute = require("./routes/messages");
 const cors = require("cors");
 const {Server} = require('socket.io')
+const CryptoJS = require("crypto-js");
+
 
 let users = []
 
 dotenv.config();
 
-mongoose.connect(
-  process.env.MONGO_URL,
-  {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useCreateIndex: true,
-    useFindAndModify: true,
-},
-  () => {
-    console.log("Connected to MongoDB"); 
-  }
-);
+const PORT = process.env.PORT
+
+mongoose.connect(process.env.MONGO_URL, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  useCreateIndex: true,
+  useFindAndModify: false,
+})
+  .then(() => {
+    console.log("Connected to MongoDB");
+  })
+  .catch((error) => {
+    console.error("Error connecting to MongoDB:", error);
+  });
 
 //middleware
 const corsOption = {
@@ -44,8 +48,8 @@ app.use("/api/posts", postRoute);
 app.use("/api/messages", messageRoute);
 app.use("/api/conversations", conversationRoute);
 
-const server = app.listen(8800, () => {
-  console.log("Backend server is running!");
+const server = app.listen(process.env.PORT || 8800, () => {
+  console.log(`Server is running on port ${server.address().port}`);
 });
 
 var io = new Server(server, {
@@ -78,13 +82,18 @@ io.on('connection', (socket) => {
   })
 
   // send and get message
-  socket.on('sendMessage', ({senderId, receiverId, text}) => {
+  socket.on('sendMessage', ({senderId, receiverId, text, encryptionKey}) => {
     const user = getUser(receiverId)
-    console.log(user, 'This is the user')
+    console.log(user, 'This is the user', text, 'key', encryptionKey)
+    
     if(user) {
+
+      const decryptedMessage = CryptoJS.AES.decrypt(text, encryptionKey).toString(CryptoJS.enc.Utf8);
+      
+      console.log('decrypted', decryptedMessage)
       io.to(user.socketId).emit('getMessage', {
         senderId,
-        text,
+        text: decryptedMessage,
       })
     }
   })

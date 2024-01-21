@@ -42,11 +42,13 @@ router.post("/register", validateCredentials, async (req, res) => {
 });
 
 //LOGIN
-router.post("/login", async(req, res) => {
+router.post("/login", async (req, res) => {
   try {
     const user = await User.findOne({ username: req.body.username });
-    if(!user) return res.status(404).json({ status: 'error', message: "Invalid Username/Password"});
+    console.log(req.body)
 
+    if(!user) return res.status(404).json({ status: 'error', message: "Invalid Username/Password"});
+  
     const hashPassword = CryptoJS.AES.decrypt(user.password, process.env.PASS_ENC_SECT)
     const Originalpassword = hashPassword.toString(CryptoJS.enc.Utf8)
     if (Originalpassword !== req.body.password) return res.status(400).json({status: 'error', message: 'Invalid Username/Password'})
@@ -61,6 +63,7 @@ router.post("/login", async(req, res) => {
     )
     res.status(200).json({status:'ok', data: {...others, accessToken}})
   } catch (err) {
+    console.log(err, 'This is the error')
     res.status(500).json({status: 'error', message: 'An error occured while trying to login'})
   }
 });

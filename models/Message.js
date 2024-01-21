@@ -13,6 +13,14 @@ const MessageSchema = new mongoose.Schema(
     text: {
       type: String,
       required: true
+    },
+    encryptedMessage: {
+      type: String,
+      required: true
+    },
+    encryptionKey: {
+      type: String,
+      required: true
     }
   },
   {timestamps: true}
